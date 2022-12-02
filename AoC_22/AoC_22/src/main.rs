@@ -13,15 +13,15 @@ use std::time::Instant;
 pub type SolutionPair = (Solution, Solution);
 
 fn main() {
-    // let args: Vec<String> = env::args().collect();
-    // if args.len() < 2 {
-    //     panic!("Please provide the day(s) to run as a command-line argument.");
-    // }
-    // let days: Vec<u8> = args[1..].iter()
-    //     .map(|x| x.parse().unwrap_or_else(|v| panic!("Not a valid day: {}", v)))
-    //     .collect();
-
-    let days: Vec<u8> = vec![2];
+    let args: Vec<String> = env::args().collect();
+    let days: Vec<u8>;
+    if args.len() < 2 {
+        days = vec![2];
+    } else {
+        days = args[1..].iter()
+        .map(|x| x.parse().unwrap_or_else(|v| panic!("Not a valid day: {}", v)))
+        .collect();
+    }
 
     let mut runtime = 0.0;
 
