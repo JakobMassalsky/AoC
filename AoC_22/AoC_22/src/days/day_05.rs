@@ -15,40 +15,28 @@ pub fn solve() -> SolutionPair {
         vec!['B', 'T', 'R'],
         vec!['C', 'L', 'W', 'N', 'H'],
     ];
-//     [W]         [J]     [J]        
-//     [V]     [F] [F] [S] [S]        
-//     [S] [M] [R] [W] [M] [C]        
-//     [M] [G] [W] [S] [F] [G]     [C]
-// [W] [P] [S] [M] [H] [N] [F]     [L]
-// [R] [H] [T] [D] [L] [D] [D] [B] [W]
-// [T] [C] [L] [H] [Q] [J] [B] [T] [N]
-// [G] [G] [C] [J] [P] [P] [Z] [R] [H]
+    
     cont.iter_mut().for_each(|x| x.reverse());
+    let mut cont2 = cont.to_vec();
     let lines = utils::read_lines("./input/input_05");
 
     for line in lines {
         let inst = line.split(char::is_whitespace).collect::<Vec<&str>>();
-        let n: u64 = inst[1].parse().unwrap();
+        let n: usize = inst[1].parse().unwrap();
         let from: usize = inst[3].parse().unwrap();
         let to: usize = inst[5].parse().unwrap();
 
-        // for _ in 0..n {
-        //     let c = cont[from-1].pop().unwrap();
-        //     cont[to-1].push(c);
-        // }
+        let i = cont[from-1].len() - n;
+        let c = cont[from-1].split_off(i);
+        cont[to-1].extend(&mut c.iter().rev());
 
-        let mut buf: Vec<char> = Vec::new();
-        for _ in 0..n {
-            let c = cont[from-1].pop().unwrap();
-            buf.push(c);
-        }
-        for _ in 0..n {
-            let c = buf.pop().unwrap();
-            cont[to-1].push(c);
-        }
+        let i = cont2[from-1].len() - n;
+        let mut c = cont2[from-1].split_off(i);
+        cont2[to-1].append(&mut c);
     }
-    let sol1 = cont.iter().map(|x| x.last().unwrap()).collect::<Vec<&char>>().iter().copied().collect::<String>();
-    let sol2: u64 = 0;
 
-    (Solution::Str(sol1), Solution::U64(sol2))
+    let sol1 = cont.iter().map(|x| x.last().unwrap()).collect::<Vec<&char>>().iter().copied().collect::<String>();
+    let sol2 = cont2.iter().map(|x| x.last().unwrap()).collect::<Vec<&char>>().iter().copied().collect::<String>();
+
+    (Solution::Str(sol1), Solution::Str(sol2))
 }
