@@ -35,8 +35,8 @@ pub fn solve() -> SolutionPair {
         cont2[to-1].append(&mut c);
     }
 
-    let sol1 = cont.iter().map(|x| x.last().unwrap()).collect::<Vec<&char>>().iter().copied().collect::<String>();
-    let sol2 = cont2.iter().map(|x| x.last().unwrap()).collect::<Vec<&char>>().iter().copied().collect::<String>();
+    let sol1 = cont.iter().map(|x| x.last().unwrap()).collect::<String>();
+    let sol2 = cont2.iter().map(|x| x.last().unwrap()).collect::<String>();
 
     (Solution::Str(sol1), Solution::Str(sol2))
 }
