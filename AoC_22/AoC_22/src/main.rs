@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 mod days;
 mod etc;
 

@@ -21,18 +21,18 @@ pub fn solve() -> SolutionPair {
     let lines = utils::read_lines("./input/input_05");
 
     for line in lines {
-        let inst = line.split(char::is_whitespace).collect::<Vec<&str>>();
-        let n: usize = inst[1].parse().unwrap();
-        let from: usize = inst[3].parse().unwrap();
-        let to: usize = inst[5].parse().unwrap();
+        let inst = line
+            .split(' ')
+            .map(|x| x.parse::<usize>().unwrap_or(0))
+            .collect::<Vec<usize>>();
 
-        let i = cont[from-1].len() - n;
-        let c = cont[from-1].split_off(i);
-        cont[to-1].extend(&mut c.iter().rev());
+        let i = cont[inst[3]-1].len() - inst[1];
+        let c = cont[inst[3]-1].split_off(i);
+        cont[inst[5]-1].extend(&mut c.iter().rev()); 
 
-        let i = cont2[from-1].len() - n;
-        let mut c = cont2[from-1].split_off(i);
-        cont2[to-1].append(&mut c);
+        let i = cont2[inst[3]-1].len() - inst[1];
+        let mut c = cont2[inst[3]-1].split_off(i);
+        cont2[inst[5]-1].append(&mut c);
     }
 
     let sol1 = cont.iter().map(|x| x.last().unwrap()).collect::<String>();
