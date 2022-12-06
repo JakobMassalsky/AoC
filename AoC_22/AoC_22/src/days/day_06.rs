@@ -1,25 +1,22 @@
-use std::collections::HashSet;
 use itertools::Itertools;
 use crate::{Solution, SolutionPair, etc::utils};
 
 ///////////////////////////////////////////////////////////////////////////////
 
-fn get_sol(chars: &Vec<char>, n: usize) -> u64 {
-    for (i, c) in chars.windows(n).enumerate() {
-        if c.iter().all_unique() {
-            return (i+n) as u64;
-        }
-    }
-    return 0;
+fn get_sol(chars: &Vec<char>, n: usize) -> usize {
+    chars
+        .windows(n)
+        .position(|x| x.iter().all_unique())
+        .unwrap() + n
 }
 
 pub fn solve() -> SolutionPair {
 
-    let lines = utils::read_lines("./input/input_06");
-    let chars = lines[0].chars().collect::<Vec<char>>();
-
-    let sol1 = get_sol(&chars, 4);
-    let sol2 = get_sol(&chars, 14);
+    let line = include_str!("../../input/input_06")
+        .chars().collect::<Vec<char>>();
+        
+    let sol1 = get_sol(&line, 4) as u64;
+    let sol2 = get_sol(&line, 14) as u64;
 
     (Solution::U64(sol1), Solution::U64(sol2))
 }
