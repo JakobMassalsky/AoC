@@ -8,8 +8,8 @@ pub fn solve() -> SolutionPair {
 
     let lines = utils::read_lines("./input/input_06");
 
-    let mut rb = vec!['0', '0', '0', '0'];
-    let mut rb2 = vec!['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'];
+    let mut rb = ['0', '0', '0', '0'];
+    let mut rb2 = ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'];
     let mut sol1: u64 = 0;
     let mut sol2: u64 = 0;
 
