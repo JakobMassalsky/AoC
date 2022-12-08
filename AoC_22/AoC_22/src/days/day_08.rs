@@ -1,4 +1,7 @@
+use std::alloc::System;
+
 use crate::{Solution, SolutionPair, etc::utils};
+use itertools::Itertools;
 use  ndarray::Array2;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,26 +30,26 @@ fn test_view(acc: &mut ndarray::ArrayBase<ndarray::OwnedRepr<i32>, ndarray::Dim<
 }
 
 pub fn solve() -> SolutionPair {
-    let lines: Vec<Vec<i32>>= utils::read_lines("./input/input_08")
-        .iter()
-        .map(|x| x.chars()
-            .map(|c| c.to_digit(10).unwrap() as i32)
-            .collect())
-        .collect();
-    let a = ndarray::Array2::<i32>::from_shape_vec((lines.len(), lines[0].len()), lines.into_iter().flatten().collect()).unwrap();
+    let lines = include_str!("../../input/input_08")
+        .replace(&['\r', '\n'][..], "")
+        .chars().map(|c| c.to_digit(10).unwrap() as i32)
+        .collect_vec();
+    let dims = (lines.len() as f64).sqrt() as usize;
+    let a = ndarray::Array2::<i32>::from_shape_vec((dims, dims), lines).unwrap();
     let mut b = ndarray::Array2::<i32>::zeros(a.raw_dim());
 
+    // Part 1
     for (x, row) in a.rows().into_iter().enumerate() {
         test_view(&mut b, &mut row.iter().enumerate(), true, x);
         test_view(&mut b, &mut row.iter().enumerate().rev(), true, x);
     }
-    
     for (y, col) in a.columns().into_iter().enumerate() {
         test_view(&mut b, &mut col.iter().enumerate(), false, y);
         test_view(&mut b, &mut col.iter().enumerate().rev(), false, y);
     }
     let sol1: u64 = b.sum() as u64;
 
+    // Part 2
     let w = a.raw_dim()[0]-1;
     let h = a.raw_dim()[1]-1;
     for x in 1..w { 
