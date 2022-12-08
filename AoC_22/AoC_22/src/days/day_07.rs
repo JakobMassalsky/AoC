@@ -4,7 +4,7 @@ use crate::{Solution, SolutionPair, etc::utils};
 
 ///////////////////////////////////////////////////////////////////////////////
 
-pub fn solve<'a>() -> SolutionPair {
+pub fn solve() -> SolutionPair {
 
     let lines = utils::read_lines("./input/input_07");
 
