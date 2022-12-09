@@ -1,19 +1,16 @@
 use crate::{Solution, SolutionPair, etc::utils};
 use itertools::Itertools;
-use  ndarray::{Array2, Axis};
+use  ndarray::Array2;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-fn get_los(filler: &mut ndarray::ArrayBase<ndarray::OwnedRepr<usize>, ndarray::Dim<[usize; 2]>>, 
-    iter: &mut dyn Iterator<Item = (usize, ndarray::ArrayBase<ndarray::ViewRepr<&i32>, ndarray::Dim<[usize; 1]>>)>) {
-    for (x, row) in iter {
-        let mut last: [usize; 10] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        for (y, h) in row.iter().enumerate() {
-            filler[[x, y]] *= *last[(*h as usize)..].iter().max().unwrap();
-            last[*h as usize] = x;
-        }
-    }
-
+fn get_los(trees: &ndarray::ArrayBase<ndarray::OwnedRepr<i32>, ndarray::Dim<[usize; 2]>>, x: usize, y: usize, w: usize, h: usize) -> i32 {
+    let th = trees[[x, y]];
+    let s1 = trees.slice(ndarray::s![..x, y]).iter().rev().position(|v| *v>=th).unwrap_or(x-1)+1;
+    let s2 = trees.slice(ndarray::s![x+1.., y]).iter().position(|v| *v>=th).unwrap_or(w - x-1)+1;
+    let s3 = trees.slice(ndarray::s![x, ..y]).iter().rev().position(|v| *v>=th).unwrap_or(y-1)+1;
+    let s4 = trees.slice(ndarray::s![x, y+1..]).iter().position(|v| *v>=th).unwrap_or(h - y-1)+1;
+    (s1 * s2 * s3 * s4) as i32
 }
 
 fn test_view(acc: &mut ndarray::ArrayBase<ndarray::OwnedRepr<i32>, ndarray::Dim<[usize; 2]>>, iter: &mut dyn Iterator<Item = (usize, &i32)>, isx: bool, x: usize) {
@@ -49,11 +46,16 @@ pub fn solve() -> SolutionPair {
         test_view(&mut b, &mut col.iter().enumerate().rev(), false, y);
     }
     let sol1: u64 = b.sum() as u64;
-    
-    // Part 2
-    let mut b = ndarray::Array2::<usize>::ones(a.raw_dim());
 
-    let sol2: u64 = 0;//*b.iter().max().unwrap() as u64;
+    // Part 2
+    let w = a.raw_dim()[0]-1;
+    let h = a.raw_dim()[1]-1;
+    for x in 1..w { 
+        for y in 1..h {
+            b[[x, y]] = get_los(&a, x, y, w, h);
+        }
+    }
+    let sol2: u64 = *b.iter().max().unwrap() as u64;
 
 
     (Solution::U64(sol1), Solution::U64(sol2))
