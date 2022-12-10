@@ -1,38 +1,39 @@
-use std::slice::SliceIndex;
+use std::{slice::SliceIndex, iter::Enumerate};
 
 use crate::{Solution, SolutionPair, etc::utils};
 use itertools::Itertools;
-use ndarray::{Array2, Axis};
+use ndarray::{Array2, Axis, s};
 
 ///////////////////////////////////////////////////////////////////////////////
 
-fn iter_line(filler: &mut ndarray::ArrayBase<ndarray::OwnedRepr<usize>, ndarray::Dim<[usize; 2]>>,
-    iter: &mut dyn Iterator<Item = (usize, &i32)>,
-    x: usize,
-    axis: usize,
-    start: usize) {
-    let mut last = [0; 10];
-    for (i, h) in iter {
-        let y = match start {
-            0 => i,
-            _ => start - i
-        };
-        *match axis {
-            0 => filler.get_mut([x, y]).unwrap(),
-            _ => filler.get_mut([y, x]).unwrap()
-        } *= i - last[(*h as usize)..].iter().max().unwrap();
-        last[*h as usize] = i;
-    }
-}
-
 fn get_los(filler: &mut ndarray::ArrayBase<ndarray::OwnedRepr<usize>, ndarray::Dim<[usize; 2]>>, 
     iter: &mut dyn Iterator<Item = (usize, ndarray::ArrayBase<ndarray::ViewRepr<&i32>, ndarray::Dim<[usize; 1]>>)>,
-    axis: usize) {
-    let max = filler.raw_dim()[0]-1;
-    for (x, row) in iter {
-        iter_line(filler, &mut row.iter().enumerate(), x, axis, 0);
-        iter_line(filler, &mut row.iter().rev().enumerate(), x, axis, max);
+    rev: bool) {
+    let mut sizes_last_seen = [[0; 10]; 99];
+    if rev {
+        for (j, row) in iter {
+            let mut size_last_seen = [0; 10];
+            for (i, h) in row.iter().enumerate() {
+                *filler.get_mut([j, i]).unwrap() 
+                    *= (i - size_last_seen[(*h as usize)..].iter().max().unwrap())
+                    * (j - sizes_last_seen[i][(*h as usize)..].iter().max().unwrap());
+                size_last_seen[*h as usize] = i;
+                sizes_last_seen[i][*h as usize] = j;
+            }
+        }
+    } else {
+        for (j, row) in iter {
+            let mut size_last_seen = [0; 10];
+            for (i, h) in row.iter().rev().enumerate() {
+                *filler.get_mut([98 - j, 98 - i]).unwrap() 
+                    *= (i - size_last_seen[(*h as usize)..].iter().max().unwrap())
+                    * (j - sizes_last_seen[i][(*h as usize)..].iter().max().unwrap());
+                size_last_seen[*h as usize] = i;
+                sizes_last_seen[i][*h as usize] = j;
+            }
+        }
     }
+
 }
 
 fn test_view(acc: &mut ndarray::ArrayBase<ndarray::OwnedRepr<i32>, ndarray::Dim<[usize; 2]>>, 
@@ -74,8 +75,8 @@ pub fn solve() -> SolutionPair {
     
     // Part 2
     let mut b = Array2::<usize>::ones(a.raw_dim());
-    get_los(&mut b, &mut a.axis_iter(Axis(0)).enumerate(), 0);
-    get_los(&mut b, &mut a.axis_iter(Axis(1)).enumerate(), 1);
+    get_los(&mut b, &mut a.axis_iter(Axis(0)).enumerate(), false);
+    get_los(&mut b, &mut a.axis_iter(Axis(0)).rev().enumerate(), true);
 
     let sol2: u64 = *b.iter().max().unwrap() as u64;
 

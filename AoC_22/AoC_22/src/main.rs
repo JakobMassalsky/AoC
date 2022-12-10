@@ -17,7 +17,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let days: Vec<u8>;
     if args.len() < 2 {
-        days = vec![10];
+        days = vec![8];
     } else {
         days = args[1..].iter()
         .map(|x| x.parse().unwrap_or_else(|v| panic!("Not a valid day: {}", v)))
