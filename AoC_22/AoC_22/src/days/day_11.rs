@@ -62,8 +62,7 @@ fn monkey_business(monkeys: &mut Vec<Monkey>, rounds: u64, max: u64) -> u64 {
 }
 
 pub fn solve() -> SolutionPair {
-
-    // let mut monkeys = gen_monkeys();
+    
     let sol1 = monkey_business(&mut gen_monkeys(), 20, 0);
 
     let mut monkeys = gen_monkeys();
