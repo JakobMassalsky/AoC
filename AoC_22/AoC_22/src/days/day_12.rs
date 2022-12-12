@@ -5,16 +5,19 @@ use crate::{Solution, SolutionPair, etc::utils};
 
 ///////////////////////////////////////////////////////////////////////////////
 
+fn get_height(c: char) -> u8 {
+    (match c {
+        'S' => 'a',
+        'E' => 'z',
+        _ => c }) as u8
+}
+
 fn get_neighbours(p: [usize; 2], map: &Vec<Vec<char>>, visited: &HashSet<[usize; 2]>) -> Vec<[usize; 2]> {
     let [x, y] = p;
-    let a = match map[x][y] {
-        'S' => 'a',
-        _ => map[x][y]} as u8;
+    let a = get_height(map[x][y]);
     let mut v = Vec::new();
     for (xn, yn) in [(x.saturating_sub(1), y), (x, y.saturating_sub(1)), ((x+1).min(map.len()-1), y), (x, (y+1).min(map[0].len()-1))] {
-        if xn == x && yn == y {continue}
-        if visited.contains(&[xn, yn]) {continue}
-        if if map[xn][yn] == 'E' {'z'} else {map[xn][yn]} as u8 > a+1 {continue}
+        if (xn == x && yn == y) || visited.contains(&[xn, yn]) || get_height(map[xn][yn]) > a+1 {continue}
         v.push([xn, yn]);
     }
     v
