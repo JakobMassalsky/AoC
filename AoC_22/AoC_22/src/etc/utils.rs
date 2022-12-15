@@ -1,7 +1,8 @@
+use std::fmt::{Debug};
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
-use std::fs::read_to_string;
+use std::str::FromStr;
 
 pub fn read_lines<P>(filename: P) -> Vec<String>
 where P: AsRef<Path> {
@@ -16,19 +17,19 @@ where P: AsRef<Path> {
     return l;
 }
 
-pub fn extract_ints(line: &String) -> Vec<i64> {
+pub fn extract_ints<T: FromStr>(line: &String, extra_chars: &[char]) -> Vec<T> where <T as FromStr>::Err: Debug {
     let mut num_buff = vec![];
     let mut nums = vec![];
     for c in line.chars() {
-        if c.is_numeric() || c == '-' {
+        if c.is_numeric() || extra_chars.contains(&c) {
             num_buff.push(c);
         } else if !num_buff.is_empty() {
-            nums.push(num_buff.iter().collect::<String>().parse::<i64>().unwrap());
+            nums.push(num_buff.iter().collect::<String>().parse::<T>().unwrap());
             num_buff.clear();
         }
     }
     if !num_buff.is_empty() {
-        nums.push(num_buff.iter().collect::<String>().parse::<i64>().unwrap());
+        nums.push(num_buff.iter().collect::<String>().parse::<T>().unwrap());
     }
     nums
 }

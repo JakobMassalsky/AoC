@@ -1,6 +1,7 @@
 use itertools::{Itertools, Combinations};
 
 use crate::{Solution, SolutionPair, etc::utils};
+use std::time::Instant;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -10,7 +11,7 @@ pub fn solve() -> SolutionPair {
     // const Y: i64 = 10;
 
     let lines = utils::read_lines("./input/input_15");
-    let mut sensors = lines.iter().map(|s| utils::extract_ints(s)).collect_vec();
+    let mut sensors = lines.iter().map(|s| utils::extract_ints::<i64>(s, &['-'])).collect_vec();
     for sensor in sensors.iter_mut() {
         let d = get_sensor_d(&sensor);
         sensor.push(d);
@@ -44,7 +45,7 @@ pub fn solve() -> SolutionPair {
             last_x = x;
         }
     }
-
+    
     let mut sol2: i64 = 0;
 
     /*  Walk around the edges of each diamond and find the 
