@@ -1,6 +1,7 @@
 use std::collections::{HashSet, HashMap, VecDeque};
 
 use itertools::Itertools;
+use ndarray::{Array2, Array};
 
 use crate::{Solution, SolutionPair, etc::utils};
 
@@ -10,97 +11,84 @@ pub fn solve() -> SolutionPair {
 
     let lines = utils::read_lines("./input/input_16");
     let lines = lines.iter().map(|s| s.replace(",", "")).collect_vec();
-    let valve_values = lines.iter().map(|s| utils::extract_ints::<u64>(s, &[])[0]).collect_vec();
-
+    let valve_values = lines.iter().map(|s| utils::extract_ints::<usize>(s, &[])[0]).collect_vec();
     let chambers = lines.iter().map(|s| s.split(" ").collect_vec()).collect_vec();
 
-    let mut connections = HashMap::new();
-    let mut valves = HashMap::new();
-    let mut activated = HashMap::new();
+    let mut chamber_to_index = HashMap::new();
     for (i, chamber) in chambers.iter().enumerate() {
-        let paths = chamber[9..].iter().cloned().map(|x| (x, 1)).collect_vec();
-        for (n, c) in paths {
-            connections.insert([chamber[1], n], c);
-            connections.insert([n, chamber[1]], c);
+        chamber_to_index.insert(chamber[1], i);
+    }
+    let mut indices_of_interest = valve_values.iter().enumerate().filter(|(i, &v)| v > 0 || i == &chamber_to_index["AA"]).map(|(i, _)| i).collect_vec();
+    let mut adjacency_matrix: Array2<u64> = Array2::zeros([chambers.len(), chambers.len()]);
+    let mut paths = Array2::zeros([chambers.len(), chambers.len()]);
+    for (i, chamber) in chambers.iter().enumerate() {
+        for &n in chamber[9..].iter() {
+            adjacency_matrix[[i, chamber_to_index[n]]] = 1;
+            adjacency_matrix[[chamber_to_index[n], i]] = 1;
         }
-        valves.insert(chamber[1].to_string(), valve_values[i]);
-        activated.insert(chamber[1], false);
     }
 
     // println!("{:?}", connections);
-    for chamber in chambers {
-        let name = chamber[1];
-        if valves[name] == 0 && name != "AA" {
-            let adjacents1 = connections.iter().filter(|(&[k1, _], _)| k1 == name).map(|(&[_, k2], v)| (k2.clone(), v.clone())).collect_vec();
-            // let mut adjacents2 = connections.iter().filter(|(&[_, k2], _)| k2 == name).map(|(&[k1, _], v)| (k1.clone(), v.clone())).collect_vec();
-            // adjacents1.append(&mut adjacents2);
-            for ((name1, v1), (name2, v2)) in adjacents1.iter().tuple_combinations() {
-                if name1 == name2 {continue;}
-                if !connections.contains_key(&[*name1, *name2]) || connections[&[*name1, *name2]] > v1+v2 {
-                    connections.insert([name1, name2], v1+v2);
-                    connections.insert([name2, name1], v1+v2);
-                }
-            } 
-            let keys = connections.keys().cloned().collect_vec();
-            for [k1, k2] in keys {
-                if k1 == name || k2 == name {
-                    connections.remove(&[k1, k2]);
-                }
-            }
+    let mut adjacency_matrix_acc: Array2<u64> = adjacency_matrix.clone();
+    for i in 1..30 {
+        for (&x, &y) in indices_of_interest.iter().tuple_combinations() {
+            if adjacency_matrix_acc[[x, y]] == 0 { continue; }
+            if paths[[x, y]] != 0 { continue; }
+            paths[[x, y]] = i;
+            paths[[y, x]] = i;
         }
+        adjacency_matrix_acc = adjacency_matrix_acc.dot(&adjacency_matrix);
     }
 
-    let scores = bfs("AA".to_string(), &connections, &valves);
+    // Matrix AA AA = 0
+    println!("{:?}", paths);
+    println!("starting search");
+    let start = chamber_to_index["AA"];
+    indices_of_interest.remove(indices_of_interest.iter().position(|&p| p==start).unwrap());
+    let score = bfs(start, &paths, &valve_values, &indices_of_interest);
     // let scores = bfs2("AA".to_string(), &connections, &valves);
-    println!("{:?}", scores.iter().max()); // VM: 1979
     // Your solution here...
-    let sol1: u64 = 0;
+    let sol1: u64 = score;
     let sol2: u64 = 0;
 
     (Solution::U64(sol1), Solution::U64(sol2))
 }
 
-fn get_neighbours(pos: (String, HashSet<String>), connections: &HashMap<[&str; 2], u64>, valve: &HashMap<String, u64>) -> Vec<((String, HashSet<String>), u64, u64)> {
-    let mut neighbours = Vec::new();
-    for (&[k1, k2], v) in connections {
-        if k1 == pos.0 {
-            let nh = pos.1.clone();//HashSet::new().union(&pos.1).cloned().collect();
-            neighbours.push(((k2.to_string(), nh), *v, 0));
-        }
-    }
-    if !pos.1.contains(&pos.0) {
-        let mut h = HashSet::new().union(&pos.1).cloned().collect::<HashSet<String>>();
-        h.insert(pos.0.clone());
-        neighbours.push(((pos.0.clone(), h), 1, valve[&pos.0]));
-    }
-    return neighbours;
+fn get_neighbours(pos: usize, paths: &Array2<i32>, indices_of_interest: &Vec<usize>) -> Vec<[usize; 2]> {
+    return indices_of_interest.iter().filter(|&&x| x != pos).map(|&chamber| [chamber, paths[[pos, chamber]] as usize]).collect_vec();
 }
 
-fn bfs(start: String, connections:  &HashMap<[&str; 2], u64>, valves: &HashMap<String, u64>) -> Vec<u64> {
+fn bfs(start: usize, paths: &Array2<i32>, valves: &Vec<usize>, indices_of_interest: &Vec<usize>) -> u64 {
     
-    let mut score_at_end = Vec::new();
-    let mut visit_queue = VecDeque::from_iter([(start.clone(), 0, HashSet::new(), 0)]);
+    let mut vec = vec![];
+    let mut visit_queue = VecDeque::from_iter([(start.clone(), indices_of_interest.clone(), 0, 0)]);
     let mut visited = HashMap::new();
-    visited.insert((start.clone(), vec!["".to_string()]), 0);
+    visited.insert((start, indices_of_interest.clone()), [0, 0]);
 
     while !visit_queue.is_empty() {
-        let (p, t, v, s) = visit_queue.pop_front().unwrap();
-        let neighbours = get_neighbours((p, v), &connections, &valves);
-        for ((name, opened), dt, score) in neighbours {
-            score_at_end.push(s);
-            let new_t = t+dt;
-            if new_t < 30 {
-                let new_score = s + score*(30-new_t);
-                let op = opened.iter().cloned().sorted().collect_vec();
-                if !visited.contains_key(&(name.clone(), op.clone())) || visited[&(name.clone(), op.clone())] < new_score {
-                    visit_queue.push_back((name.clone(), new_t, opened, new_score));
-                    visited.insert((name, op), new_score);
+        let (pos, remaining_valves, timestep, score) = visit_queue.pop_front().unwrap();
+        visited.insert((pos, remaining_valves.clone()), [timestep, score]);
+        let neighbours = get_neighbours(pos, paths, &remaining_valves.clone());
+        for [new_pos, dist] in neighbours {
+            let new_t = timestep + dist + 1;
+            if new_t >= 30 { 
+                vec.push(score);
+                continue; 
+            }
+            let new_score = score + valves[pos]*(30-new_t);
+            let mut v = remaining_valves.clone();
+            v.remove(remaining_valves.iter().position(|&p| p==new_pos).unwrap());
+            if visited.contains_key(&(new_pos, v.clone()))  {
+                let [t, s] = visited[&(new_pos, v.clone())];
+                if t <= new_t && s >= new_score {
+                    continue;
                 }
             }
+            visit_queue.push_back((new_pos, v, new_t, new_score));
         }
     }
-    // println!("{:?}", score_at_end); 
-    score_at_end
+    // println!("{}", vec.iter().max().unwrap());
+    *visited.values().map(|[_, s]| s).max().unwrap() as u64
 }
 
 // fn bfs2(start: String, connections:  &HashMap<[&str; 2], u64>, valves: &HashMap<String, u64>) -> Vec<u64> {
