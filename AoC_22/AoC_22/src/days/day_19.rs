@@ -21,7 +21,11 @@ pub fn solve() -> SolutionPair {
     (Solution::U64(sol1), Solution::U64(sol2))
 }
 
-fn isKthBitSet(n: u32, k: u32) -> bool {
+fn theo_max(state: &Vec<isize>, t: isize) -> isize {
+    return state[3] + state[7] * (24 - t);
+}
+
+fn is_kth_bit_set(n: u32, k: u32) -> bool {
     (n >> k) & 1 > 0
 }
 
@@ -30,11 +34,11 @@ fn try_buy(state: &Vec<isize>, orders: u32, blueprint: &Vec<isize>, new_g: isize
     if new_state[0] > 4 && orders == 0 {
         return None;
     }
-    if isKthBitSet(orders, 0) {
+    if is_kth_bit_set(orders, 0) {
         new_state[0] -= blueprint[1];
         new_state[4] += 1;
     }
-    if isKthBitSet(orders, 1) {
+    if is_kth_bit_set(orders, 1) {
         new_state[0] -= blueprint[2];
         new_state[5] += 1;
     }
@@ -48,9 +52,18 @@ fn try_buy(state: &Vec<isize>, orders: u32, blueprint: &Vec<isize>, new_g: isize
     return Some(new_state);
 }
 
-fn get_neighbours(state: &Vec<isize>, blueprint: &Vec<isize>) -> Vec<Vec<isize>> {
+fn get_neighbours(state: &Vec<isize>, blueprint: &Vec<isize>, min_ore: isize, max_ore:isize) -> Vec<Vec<isize>> {
     let mut v = Vec::new();
     let mut new_state = state.clone();
+    // nothing can be built
+    if state[0] < min_ore {
+        new_state[0] += state[4];
+        new_state[1] += state[5];
+        new_state[2] += state[6];
+        new_state[3] += state[7];
+        v.push(new_state);
+        return v;
+    }
     if state[2] >= blueprint[6] && state[0] >= blueprint[5] {
         new_state[0] -= blueprint[5];
         new_state[2] -= blueprint[6];
@@ -80,10 +93,10 @@ fn bfs(start: Vec<isize>, blueprint: &Vec<isize>) -> u64 {
         let (state, time) = visit_queue.pop_front().unwrap();
         max = max.max(state[3]);
         let new_time = time+1;
-        if new_time >= 19 {
+        if new_time >= 20 {
             continue;
         }
-        for n in get_neighbours(&state, &blueprint) {
+        for n in get_neighbours(&state, &blueprint, 2, 4) {
             for v in visited.clone().iter().filter(|v| (0..8).all(|i| v[i] <= n[i])) {
                 visited.remove(v);
             }
