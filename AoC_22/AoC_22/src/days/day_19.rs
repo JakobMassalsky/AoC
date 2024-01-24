@@ -83,6 +83,17 @@ fn get_neighbours(state: &Vec<isize>, blueprint: &Vec<isize>, min_ore: isize, ma
     v
 }
 
+fn get_neighbours2(state: &Vec<isize>, blueprint: &Vec<isize>) -> Vec<Vec<isize>> {
+    
+    // v
+}
+
+fn dfs(start: Vec<isize>, blueprint: &Vec<isize>, rem: i32) -> u64 {
+    if rem == 0 { return start[3] as u64; }
+    let m = get_neighbours2(&start, blueprint).iter().map(|&k| dfs(k, blueprint, rem-1)).max().unwrap();
+    m
+}
+
 fn bfs(start: Vec<isize>, blueprint: &Vec<isize>) -> u64 {
     let mut visit_queue = VecDeque::from_iter([(start.clone(), 0)]); 
     let mut visited = HashSet::new();
