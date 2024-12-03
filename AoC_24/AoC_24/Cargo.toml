@@ -1,0 +1,15 @@
+[package]
+name = "AoC_24"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+itertools = "0.13.0"
+ndarray = "0.16.1"
+rusttype = "0.9.3"
+collect_slice = "^1.2.0"
+priority-queue = "2.1.1"
+regex = "1.11.1"
+# cached = "0.54.0"
