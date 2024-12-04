@@ -153,3 +153,10 @@ pub fn extract_ranges<T: Clone, R: std::ops::RangeBounds<usize>>(vec: &[T], rang
         })
         .collect()
 }
+
+// diagonal Iter
+
+// let indices = iter::repeat(0).take(l).chain(1..l)
+//     .enumerate()
+//     .map(|(i, x)| (x..=i).zip((x..=i.min(l-1)).rev()).take((1+i as i64).min((2*l -1) as i64 - i as i64) as usize).collect::<Vec<_>>())
+//     .collect::<Vec<Vec<(usize, usize)>>>();
