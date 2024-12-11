@@ -4,29 +4,25 @@ use crate::{etc::utils::{self, SumBy}, Solution, SolutionPair};
 
 ///////////////////////////////////////////////////////////////////////////////
 
-fn step(map: &Vec<Vec<u32>>, old: u32, new: u32, c: (usize, usize)) -> Vec<(usize, usize)> {
-    if new == old + 1 {
-        if new == 9 {
-            vec![c]
-        } else {
-            dfs(map, c)
-        }
+fn step(map: &Vec<Vec<u32>>, new: u32, c: (usize, usize)) -> Vec<(usize, usize)> {
+    if new == 9 {
+        vec![c]
     } else {
-        vec![]
+        dfs(map, c)
     }
 }
 
 fn dfs(map: &Vec<Vec<u32>>, (cx, cy): (usize, usize)) -> Vec<(usize, usize)> {
     
     let mut set = vec![];
-    let mut c = (cx.saturating_sub(1), cy);
-    set.extend(step(map, map[cx][cy], map[c.0][c.1], c));
-    c = (cx, cy.saturating_sub(1));
-    set.extend(step(map, map[cx][cy], map[c.0][c.1], c));
-    c = (cx, (cy+1).min(map[0].len()-1));
-    set.extend(step(map, map[cx][cy], map[c.0][c.1], c));
-    c = ((cx+1).min(map.len()-1), cy);
-    set.extend(step(map, map[cx][cy], map[c.0][c.1], c));
+    for c in [(cx.saturating_sub(1), cy), 
+                              (cx, cy.saturating_sub(1)), 
+                              (cx, (cy+1).min(map[0].len()-1)), 
+                              ((cx+1).min(map.len()-1), cy)] {
+        if map[c.0][c.1] == map[cx][cy] + 1 {
+            set.extend(step(map, map[c.0][c.1], c));
+        }
+    }
 
     set
 }
