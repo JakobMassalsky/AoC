@@ -23,8 +23,7 @@ pub fn solve() -> SolutionPair {
     for i in 0..10000 {
         let pos = lines.iter().map(|p| move_robot(p, i)).collect_vec();
         if pos.iter().map(|(x, y)| x * W + y).unique().sorted().tuple_windows()
-            .any(|(i1, i2, i3, i4, i5, i6, i7, i8) | 
-                i1 + 1 == i2 && i2 + 1 == i3 && i3 + 1 == i4 && i4 + 1 == i5 && i5 + 1 == i6 && i6 + 1 == i7 && i7 + 1 == i8) {
+            .any(|(i1, _, _, _, _, _, _, i8)| i1 + 7 == i8) {
             p = i;
             let mut img = vec![vec![' '; W as usize]; H as usize];
             for (x, y) in pos {
