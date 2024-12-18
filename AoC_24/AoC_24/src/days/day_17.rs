@@ -56,20 +56,19 @@ fn do_op(opcode: u64, operand: u64, reg: &mut Registers) {
 //     // 2,4,1,3,7,5,4,2,0,3,1,5,5,5,3,0
 // }
 
-fn find_bits(instructions: &Vec<u64>, r: Registers, ins: u64, tota: u64) -> Option<u64> {
-    if ins == instructions.len() as u64 {return Some(tota)}
+fn find_bits(instructions: &Vec<u64>, r: Registers, ins: i64, tota: u64) -> Option<u64> {
+    if ins < 0 {return Some(tota)}
     let mut options = vec![];
     let c = instructions[ins as usize];
     for a in 0..8 {
         let mut reg = r.clone();
         reg.ip = 0;
-        reg.A = a; // << 8_u64.pow(ins as u32);
+        reg.A = (tota << 3) + a;
         while reg.ip < instructions.len() as u64 {
             do_op(instructions[reg.ip as usize], instructions[reg.ip as usize + 1], &mut reg);
         }
         if reg.B % 8 == c {
-            reg.ip = 0;
-            options.push(find_bits(instructions, reg, ins+1, tota + (a << (3*ins))));
+            options.push(find_bits(instructions, reg, ins-1, (tota << 3) + a));
         }
         // println!("{}, {}", a, reg.B % 8);
     }
@@ -91,7 +90,7 @@ pub fn solve() -> SolutionPair {
     // while computer.ip < instructions.len() as u64 {
     //     do_op(instructions[computer.ip as usize], instructions[computer.ip as usize + 1], &mut computer);
     // }
-    let res = find_bits(&instructions, computer, 0, 0);
+    let res = find_bits(&instructions, computer, instructions.len() as i64 - 1, 0);
     println!("{}", res.unwrap());
 
     // Your solution here...
