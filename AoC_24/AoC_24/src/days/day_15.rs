@@ -102,8 +102,8 @@ pub fn solve() -> SolutionPair {
         .map(|v| v.into_iter().map(|c| match c {
             'O' => ['[', ']'],
             _ => [*c, *c],
-        }).flatten().collect_vec())
-        .collect_vec();
+        }).flatten().collect())
+        .collect();
 
     // Your solution here...
     let sol1: u64 = move_robot(warehouse, &ins, move_crate);
