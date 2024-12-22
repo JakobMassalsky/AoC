@@ -1,4 +1,4 @@
-use std::fmt::{Debug};
+use std::fmt::Debug;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
@@ -135,24 +135,24 @@ where
     }
 }
 
-pub fn extract_ranges<T: Clone, R: std::ops::RangeBounds<usize>>(vec: &[T], ranges: &[R]) -> Vec<T> {
-    ranges
-        .iter()
-        .flat_map(|range| {
-            let start = match range.start_bound() {
-                std::ops::Bound::Included(&s) => s,
-                std::ops::Bound::Excluded(&s) => s + 1,
-                std::ops::Bound::Unbounded => 0,
-            };
-            let end = match range.end_bound() {
-                std::ops::Bound::Included(&e) => e + 1,
-                std::ops::Bound::Excluded(&e) => e,
-                std::ops::Bound::Unbounded => vec.len(),
-            };
-            vec[start..usize::min(end, vec.len())].to_vec()
-        })
-        .collect()
-}
+// pub fn extract_ranges<T: Clone, R: std::ops::RangeBounds<usize>>(vec: &[T], ranges: &[R]) -> Vec<T> {
+//     ranges
+//         .iter()
+//         .flat_map(|range| {
+//             let start = match range.start_bound() {
+//                 std::ops::Bound::Included(&s) => s,
+//                 std::ops::Bound::Excluded(&s) => s + 1,
+//                 std::ops::Bound::Unbounded => 0,
+//             };
+//             let end = match range.end_bound() {
+//                 std::ops::Bound::Included(&e) => e + 1,
+//                 std::ops::Bound::Excluded(&e) => e,
+//                 std::ops::Bound::Unbounded => vec.len(),
+//             };
+//             vec[start..usize::min(end, vec.len())].to_vec()
+//         })
+//         .collect()
+// }
 
 // diagonal Iter
 
