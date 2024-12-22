@@ -13,3 +13,5 @@ collect_slice = "^1.2.0"
 priority-queue = "2.1.1"
 regex = "1.11.1"
 cached = "0.54.0"
+
+[profile.release]

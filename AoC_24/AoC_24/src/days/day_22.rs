@@ -15,12 +15,12 @@ fn r_next(mut input: usize) -> usize {
 fn store_sequences(seqs: &mut Vec<usize>, mut secret: usize) -> usize {
     let mut last = secret % 10;
     let mut k = 0;
-    let mut v = [false; 20_usize.pow(4)];
+    let mut v = [false; 19_usize.pow(4)];
 
     for i in 0..2000 {
         secret = r_next(secret);
         let price = secret % 10;
-        k = (k * 20 + price + 10 - last) % 160000;
+        k = (k * 19 + price + 9 - last) % 130321;
         last = price;
         if i < 3 || v[k] { continue }
         v[k] = true;
@@ -30,7 +30,7 @@ fn store_sequences(seqs: &mut Vec<usize>, mut secret: usize) -> usize {
 }
 
 pub fn solve() -> SolutionPair {
-    let mut m = vec![0; 160000];
+    let mut m = vec![0; 130321];
 
     // Your solution here...
     let sol1: u64 = utils::read_lines("./input/input_22")
